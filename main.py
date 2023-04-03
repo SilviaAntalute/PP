@@ -1,129 +1,154 @@
-class Celula:
+import os
+"from PIL import Image as pim"
+import xml.etree.ElementTree as et
 
-    def get_nume(self):
+class GenericFile:
+    def get_path(self):
         raise NotImplementedError("Functie neimplementata!")
 
-class FibraMusculara(Celula):
+    def get_freq(self):
+        raise NotImplementedError("Functie neimplementata!")
 
-    def __init__(self,nume, masa):
-        self.nume=nume
-        self.masa_musculara=masa
+class TextASCII(GenericFile):
 
-    def get_nume(self):
-        return self.nume
+    def __init__(self, path_absolut, frecvente):
+        self.path_absolut = path_absolut
+        self.frecvente = frecvente
 
-    def get_masa_musculara(self):
-        return self.masa_musculara
+    def get_path(self):
+        return self.path_absolut
 
+    def get_freq(self):
+        return self.frecvente
 
-class FibraNervoasa(Celula):
+class TextUNICODE(GenericFile):
 
-    def __init__(self, nume, lungime):
-        self.nume = nume
-        self.lungime = lungime
+    def __init__(self, path_absolut, frecvente):
+        self.path_absolut = path_absolut
+        self.frecvente = frecvente
 
-    def get_nume(self):
-        return self.nume
+    def get_path(self):
+        return self.path_absolut
 
-    def get_lungime(self):
-        return self.lungime
+    def get_freq(self):
+        return self.frecvente
 
-class MuschiGeneric:
+class Binary(GenericFile):
 
-    def __init__(self, fibre, nume, masa_musculara, scop):
-        self.fibre=fibre
-        self.nume=nume
-        self.masa_musculara=masa_musculara
-        self.scop=scop
+    def __init__(self, path_absolut, frecvente):
+        self.path_absolut = path_absolut
+        self.frecvente = frecvente
 
-    def get_nume(self):
-        return self.nume
+    def get_path(self):
+        return self.path_absolut
 
-    def get_masa_musculara(self):
-        return self.masa_musculara
+    def get_freq(self):
+        return self.frecvente
 
-    def get_scop(self):
-        return self.scop
+class XMLFile(TextASCII):
 
+    def __init__(self, path_absolut, frecvente, first_tag):
+        super().__init__(path_absolut, frecvente)
+        self.first_tag = first_tag
 
-class TrunchiNervos:
+    def get_first_tag(self):
+        return self.first_tag
 
-    def __init__(self, nervi, nume, lungime, specializare):
-        self.nervi=nervi
-        self.nume=nume
-        self.lungime=lungime
-        self.specialziare=specializare
+class BMP(Binary):
 
-    def get_nume(self):
-        return self.nume
+    def __init__(self, path_absolut, frecvente, width, height, bpp):
+        super().__init__(path_absolut, frecvente)
+        self.width = width
+        self.height = height
+        self.bpp = bpp
 
-    def get_lungime(self):
-        return self.lungime
+    def show_info(self):
+        print(self.width, self.height, self.bpp)
 
-    def get_specializare(self):
-        return self.specialziare
-
-class Biceps(MuschiGeneric):
-
-    def __init__(self, fibre, nume, masa_musculara, scop, brat):
-        super().__init__(fibre, nume, masa_musculara, scop)
-        self.brat=brat
-
-    def get_brat(self):
-        return self.brat
-
-def masa_musculara_totala(list):
-    sum=0
-    for item in list:
-        sum=sum+item.get_masa_musculara()
-    return sum
-
-def lungime_totala(list):
-    sum=0
-    for item in list:
-        sum=sum+item.get_lungime()
-    return sum
-
-def functie_locomotorie(list):
-    list2=[]
-    for item in list:
-        for scop in item.get_scop():
-            if (scop=="locomotor"):
-                list2.append(item)
-    return list2
 if __name__ == '__main__':
-    fibram1 = FibraMusculara("nume_fibram1", 0.5)
-    fibram2 = FibraMusculara("nume_fibram2", 0.6)
-    fibram3 = FibraMusculara("nume_fibram3", 0.7)
 
-    fibran1 = FibraNervoasa("nume_fibran1", 0.15)
-    fibran2 = FibraNervoasa("nume_fibran2", 0.16)
-    fibran3 = FibraNervoasa("nume_fibran3", 0.17)
+    frecventa = {}
+    xml_list = []
+    unicode_list = []
+    bmp_list = []
 
-    lista_fibrem = [fibram1, fibram2, fibram3]
-    lista_fibren = [fibran1, fibran2, fibran3]
+    ROOT_DIR = "director"
+    for root, subdirs, files in os.walk(ROOT_DIR):
+        for file in os.listdir(root):
+            file_path = os.path.join(root, file)
+            if os.path.isfile(file_path):
+                f = open(file_path, 'rb')
+                try:
+                    content = f.read()
 
-    triceps_stang = MuschiGeneric(lista_fibrem, "triceps stang", 0.44, ["locomotor", "relaxare"])
-    triceps_drept = MuschiGeneric(lista_fibrem, "triceps drept", 0.45, ["locomotor", "relaxare"])
-    gamba_stanga = MuschiGeneric(lista_fibrem, "gamba stanga", 0.6, ["locomotor", "incordare"])
-    gamba_dreapta = MuschiGeneric(lista_fibrem, "gamba dreapta", 0.61, ["locomotor", "incordare"])
-    stomac = MuschiGeneric(lista_fibrem, "stomac", 1, ["digestie"])
+                    for i in content:
+                        if i in frecventa.keys():
+                            frecventa[i] += 1
+                        else:
+                            frecventa[i] = 1
 
-    emisfera_stanga = TrunchiNervos(lista_fibren, "emisfera stanga", 160, ["gandire"])
-    emisfera_dreapta = TrunchiNervos(lista_fibren, "emisfera dreapta", 162, ["gandire"])
-    maduva = TrunchiNervos(lista_fibren, "maduva", 200, ["celule stem"])
+                    media = len(content) / len(frecventa.keys())
 
-    biceps_stang = Biceps(lista_fibrem,"biceps stang", 2, ["locomotor", "incordare brat stang"], "stang")
-    biceps_drept = Biceps(lista_fibrem, "biceps drept", 2, ["locomotor", "incordare brat drept"], "drept")
+                    # verificare ascii
 
-    sum=masa_musculara_totala([triceps_stang, triceps_drept, gamba_stanga, gamba_dreapta, stomac, biceps_stang, biceps_drept])
-    print("Masa musculara totala: "+str(sum))
+                    frecvente_mari = [9, 10, 13] + [i for i in range(32, 128)]
+                    frecvente_mici = [i for i in range(0, 9)] + [11, 12] + [i for i in range(14, 32)] + [i for i in
+                                                                                                         range(128,
+                                                                                                               256)]
 
-    sum=lungime_totala([emisfera_dreapta, emisfera_dreapta, maduva])
-    print("Lungimea totala a axonilor: " + str(sum))
+                    isASCII = True
+                    for it in frecvente_mari:
+                        if it in frecventa.keys() and frecventa[it] < media:
+                            isASCII = False
 
-    list=functie_locomotorie([triceps_stang, triceps_drept, gamba_stanga, gamba_dreapta, stomac, biceps_stang, biceps_drept])
-    print("Muschii care au ca scop functia locomotorie: ")
-    for item in list:
-        print(item.get_nume() + ": ")
-        print(item.get_scop())
+                    for it in frecvente_mici:
+                        if it in frecventa.keys() and frecventa[it] > media:
+                            isASCII = False
+
+                    if isASCII:
+                        try:
+                            tree = et.parse(file_path)
+                            rt = tree.getroot()
+                            first_tag = rt.tag
+                            xml_list.append(XMLFile(file_path, frecventa, first_tag))
+                        except:
+                            isXML = False
+
+                    # verificare unicode
+
+                    if '0' in frecventa.keys():
+                        if frecventa['0'] >= 0.3 * len(content):
+                            unicode_list.append(TextUNICODE(file_path, frecventa))
+
+                    # verificare binar
+
+                    nr = 0
+                    isBinary = True
+                    for i in range(0, 256):
+                        if i in frecventa and not (media * 0.5 < frecventa[i] < media * 1.5):
+                            nr += 1
+
+                    if nr > 0.1 * len(frecventa.keys()):
+                        isBinary = False
+
+                    if isBinary and not (isASCII):
+                        image = pim.open(file_path)
+                        width, height = image.size
+                        bpp = image.depth * len(image.getbands())
+                        bmp_list.append(BMP(file_path, frecventa, width, height, bpp))
+
+                finally:
+                    f.close()
+
+    print("Fisiere XML ASCII:")
+    for it in xml_list:
+        print(it.get_path())
+
+    print("\nFisiere UNICODE:")
+    for it in unicode_list:
+        print(it.get_path())
+
+    print("\nFisiere BMP:")
+    for it in bmp_list:
+        print(it.get_path())
+        it.show_info()
