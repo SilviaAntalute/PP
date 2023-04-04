@@ -1,5 +1,5 @@
 import os
-"from PIL import Image as pim"
+from PIL import Image as pim
 import xml.etree.ElementTree as et
 
 class GenericFile:
