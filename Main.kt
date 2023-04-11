@@ -21,16 +21,6 @@ fun isEqual(v1: HistoryLogRecord,v2: HistoryLogRecord):Boolean{
     else
         return false
 }
-//fun findAndReplace(target:HistoryLogRecord,objReplace:HistoryLogRecord,map:MutableMap<out Date,HistoryLogRecord>){
-//    for(key in map.keys.toList()) {
-//        val valoare: HistoryLogRecord = map.getValue(key)
-//        if(isEqual(valoare,target) )
-//        {
-//            map.remove(key)
-//            map.plusAssign(key to objReplace)
-//        }
-//    }
-//}
 fun main(args: Array<String>) {
     val file = File("/var/log/apt/history.log")
     val scanner = Scanner(file)
