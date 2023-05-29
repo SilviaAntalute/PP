@@ -1,35 +1,16 @@
-import concurrent.futures
+from functools import reduce
 
+numbers = [1, 21, 75, 39, 7, 2, 35, 3, 31, 7, 8]
 
+filtered_numbers = list(filter(lambda x: x >= 5, numbers))
 
+paired_numbers = list(zip(filtered_numbers[::2], filtered_numbers[1::2]))
 
-class ThreadPool:
-    def __init__(self, num_threads):
-        self.num_threads = num_threads
-        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=num_threads)
+multiplied_numbers = list(map(lambda x: x[0] * x[1], paired_numbers))
 
-    def __enter__(self):
-        return self
+result = reduce(lambda x, y: x + y, multiplied_numbers)
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.terminate()
-
-    def map(self, func, iterable):
-        chunk_size = len(iterable) // self.num_threads
-        chunks = [iterable[i:i+chunk_size] for i in range(0, len(iterable), chunk_size)]
-        futures = []
-        for chunk in chunks:
-            future = self.executor.submit(func, chunk)
-            futures.append(future)
-        results = []
-        for future in futures:
-            result = future.result()
-            results.extend(result)
-        return results
-
-    def terminate(self):
-        self.executor.shutdown()
-
-    def join(self):
-        self.executor.shutdown(wait=True)
-
+print(filtered_numbers)
+print(paired_numbers)
+print(multiplied_numbers)
+print(result)

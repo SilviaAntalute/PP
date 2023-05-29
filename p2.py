@@ -1,18 +1,15 @@
-import subprocess
-command = input("Introduceți comanda: ")
+from more_itertools import map_reduce
 
-commands = command.split("|")
+text = "Aceasta este o propozitie de test pentru algoritm."
 
-input_data = None
+def map_function(word):
+    return (word[0], [word])
 
-for cmd in commands:
-    # Eliminarea spațiilor albe de la început și sfârșit
-    cmd = cmd.strip()
+def reduce_function(key, values):
+    return (key, values)
 
-    process = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+result = map_reduce(text.split(), map_function, reduce_function)
 
-    output, _ = process.communicate(input_data)
-
-    input_data = output
-
-    print(output.decode())
+sorted_pairs = sorted(result, key=lambda pair: pair[0])
+for pair in sorted_pairs:
+    print(pair)
